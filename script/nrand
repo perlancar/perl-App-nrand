@@ -15,6 +15,7 @@ my %Opts = (
     max => undef,
     mean => undef,
     stdev => undef,
+    format => undef,
 );
 
 sub parse_cmdline {
@@ -26,6 +27,7 @@ sub parse_cmdline {
         'max=f'      => \$Opts{max},
         'mean=f'     => \$Opts{mean},
         'stdev=f'    => \$Opts{stdev},
+        'format|f=s' => \$Opts{format},
         'version|v'  => sub {
             no warnings 'once';
             print "nrand version ", ($main::VERSION || 'dev'),
@@ -35,7 +37,7 @@ sub parse_cmdline {
         'help|h' => sub {
             print <<USAGE;
 Usage:
-  nrand [--num|-n N|--infinite] <(--min X --max Y) | (--mean X --stdev Y)>
+  nrand [--num|-n N|--infinite] [--format FMT] <(--min X --max Y) | (--mean X --stdev Y)>
   nrand --help, -h
   nrand --version, -v
 
@@ -62,7 +64,7 @@ sub run {
                 n     => $nbatch,
                 round => 0,
             });
-            print "$_\n" for @$nums;
+            print (defined($Opts{format}) ? sprintf($Opts{format}, "$_") : "$_\n") for @$nums;
             last if $n == 0;
         }
     } elsif (defined $Opts{mean} && defined $Opts{stdev}) {
@@ -70,7 +72,7 @@ sub run {
         my $gen = Math::Random::NormalDistribution::rand_nd_generator(
             $Opts{mean}, $Opts{stdev});
         while (1) {
-            print $gen->(), "\n";
+            print +(defined($Opts{format}) ? sprintf($Opts{format}, $gen->()) : $gen->()), "\n";
             $n-- if $n > 0;
             last if $n == 0;
         }
@@ -118,6 +120,11 @@ run();
 =item * --num int
 
 =item * --infinite
+
+=item * --format, -f
+
+An sprintf() template to use. For example, if you want to format to three
+decimal digits, you can use C<%.3f>.
 
 =back
 
