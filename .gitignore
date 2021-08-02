@@ -2,3 +2,4 @@ App-nrand-*
 .build
 *~
 nytprof*
+.DS_Store
